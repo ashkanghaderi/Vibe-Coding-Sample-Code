@@ -47,6 +47,7 @@ no `.env`.
 ## Verifying a change
 
 ```bash
+./scripts/test-ios.sh      # unit tests
 ./scripts/shoot-ios.sh     # builds, runs, and re-captures
 ```
 

@@ -2,6 +2,7 @@
   "permissions": {
     "allow": [
       "Bash(./scripts/shoot-ios.sh:*)",
+      "Bash(./scripts/test-ios.sh:*)",
       "Bash(xcodegen generate)",
       "Bash(xcrun simctl list:*)",
       "Bash(git status:*)",

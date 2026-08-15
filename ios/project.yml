@@ -14,8 +14,17 @@ targets:
     type: application
     platform: iOS
     sources: [Sources]
+    scheme:
+      testTargets: [FlashcardsTests]
     info:
       path: Info.plist
       properties:
         UILaunchScreen: {}
         CFBundleDisplayName: Flashcards
+
+  FlashcardsTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [Tests]
+    dependencies:
+      - target: Flashcards
