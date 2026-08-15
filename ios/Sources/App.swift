@@ -20,14 +20,21 @@ struct FlashcardsApp: App {
 /// It is inert in normal use: with no launch arguments, `current` is nil.
 enum ScreenshotState {
     case review(deckNamed: String, revealed: Bool)
+    case addDeck
 
     static var current: ScreenshotState? {
         let defaults = UserDefaults.standard
-        guard defaults.string(forKey: "screen") == "review" else { return nil }
-        return .review(
-            deckNamed: defaults.string(forKey: "deck") ?? "Spanish — Verbs",
-            revealed: defaults.bool(forKey: "revealed")
-        )
+        switch defaults.string(forKey: "screen") {
+        case "review":
+            return .review(
+                deckNamed: defaults.string(forKey: "deck") ?? "Spanish — Verbs",
+                revealed: defaults.bool(forKey: "revealed")
+            )
+        case "addDeck":
+            return .addDeck
+        default:
+            return nil
+        }
     }
 }
 
@@ -49,17 +56,12 @@ struct DeckList: View {
     var openTo: ScreenshotState? = nil
 
     @State private var path: [Deck] = []
-    @State private var decks: [Deck] = DeckList.sampleDecks
-
-    static let sampleDecks: [Deck] = [
-        Deck(name: "Spanish — Verbs", totalCount: 240),
-        Deck(name: "Spanish — Food", totalCount: 86),
-        Deck(name: "Kanji N5", totalCount: 103),
-    ]
+    @State private var store = DeckStore()
+    @State private var isAddingDeck = false
 
     var body: some View {
         NavigationStack(path: $path) {
-            List(decks) { deck in
+            List(store.decks) { deck in
                 NavigationLink(value: deck) {
                 HStack(spacing: 14) {
                     RoundedRectangle(cornerRadius: 8)
@@ -86,7 +88,12 @@ struct DeckList: View {
                 ReviewView(deck: $0, startRevealed: startRevealed)
             }
             .navigationTitle("Decks")
-            .toolbar { Button("Add", systemImage: "plus") {} }
+            .toolbar {
+                Button("Add", systemImage: "plus") { isAddingDeck = true }
+            }
+            .sheet(isPresented: $isAddingDeck) {
+                AddDeckView(store: store) { isAddingDeck = false }
+            }
         }
         .onAppear(perform: applyScreenshotState)
     }
@@ -97,9 +104,14 @@ struct DeckList: View {
     }
 
     private func applyScreenshotState() {
-        guard case .review(let name, _) = openTo,
-              let deck = decks.first(where: { $0.name == name })
-        else { return }
-        path = [deck]
+        switch openTo {
+        case .review(let name, _):
+            guard let deck = store.decks.first(where: { $0.name == name }) else { return }
+            path = [deck]
+        case .addDeck:
+            isAddingDeck = true
+        case nil:
+            break
+        }
     }
 }

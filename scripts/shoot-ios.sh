@@ -54,6 +54,19 @@ xcrun simctl boot "$UDID" 2>/dev/null || true
 xcrun simctl bootstatus "$UDID" -b >/dev/null
 xcrun simctl install "$UDID" .build/Build/Products/Debug-iphonesimulator/Flashcards.app
 
+# Put the simulator into a known state before photographing it.
+#
+# A fresh simulator shows iOS's own keyboard tutorial ("Speed up your typing by
+# sliding your finger...") the first time a text field takes focus. It appeared
+# in the middle of the New Deck screenshot - a figure of somebody else's UI, in
+# a book whose figures are supposed to be reproducible. The script was
+# deterministic; the simulator was not.
+#
+# Anything the screenshots depend on belongs here, where it is visible. See
+# Chapter 8.
+xcrun simctl spawn "$UDID" defaults write com.apple.Preferences \
+    DidShowContinuousPathIntroduction -bool true
+
 mkdir -p "$SHOTS"
 
 # Each screenshot is a fresh launch with launch arguments naming the screen and
@@ -79,3 +92,4 @@ shoot() {
 shoot ios-deck-list
 shoot ios-review-front   -screen review -revealed NO
 shoot ios-review-back    -screen review -revealed YES
+shoot ios-add-deck       -screen addDeck
