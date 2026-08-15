@@ -7,6 +7,8 @@ struct ReviewView: View {
 
     @State private var index = 0
     @State private var isRevealed = false
+    @State private var generatorMessage: String?
+    @State private var isGenerating = false
 
     private var cards: [Card] { deck.dueCards }
     private var card: Card? { cards.indices.contains(index) ? cards[index] : nil }
@@ -54,11 +56,22 @@ struct ReviewView: View {
                         .foregroundStyle(.secondary)
                 }
             } else {
-                ContentUnavailableView(
-                    "Nothing due",
-                    systemImage: "checkmark.circle",
-                    description: Text("This deck has no cards waiting for review.")
-                )
+                ContentUnavailableView {
+                    Label("Nothing due", systemImage: "checkmark.circle")
+                } description: {
+                    Text("This deck has no cards waiting for review.")
+                } actions: {
+                    Button("Generate cards with AI", action: generate)
+                        .buttonStyle(.borderedProminent)
+                        .disabled(isGenerating)
+                    if let generatorMessage {
+                        Text(generatorMessage)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.top, 6)
+                    }
+                }
             }
         }
         .padding(.bottom, 28)
@@ -80,6 +93,32 @@ struct ReviewView: View {
         .buttonStyle(.borderedProminent)
         .tint(tint)
         .controlSize(.large)
+    }
+
+    /// Asks the generator for cards.
+    ///
+    /// There is no key in this repository and no default, so on a machine that
+    /// has not set FLASHCARDS_API_KEY this reports that and stops. That is the
+    /// path most readers will see, and it is the honest one to show.
+    private func generate() {
+        guard let key = APIKey.fromEnvironment else {
+            generatorMessage = "Set FLASHCARDS_API_KEY in the environment to "
+                + "generate cards. There is no key in this repository."
+            return
+        }
+        isGenerating = true
+        Task {
+            defer { isGenerating = false }
+            do {
+                let cards = try await RemoteCardGenerator(key: key)
+                    .generate(count: 10, forDeckNamed: deck.name)
+                generatorMessage = "Generated \(cards.count) cards."
+            } catch {
+                // `error` here can never contain the key; that is asserted by a
+                // test rather than left to the reader to check. See Chapter 10.
+                generatorMessage = "Could not generate cards: \(error)"
+            }
+        }
     }
 
     private func advance() {

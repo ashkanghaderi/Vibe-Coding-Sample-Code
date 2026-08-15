@@ -101,6 +101,7 @@ shoot ios-deck-list
 shoot ios-review-front   -screen review -revealed NO
 shoot ios-review-back    -screen review -revealed YES
 shoot ios-add-deck       -screen addDeck
+shoot ios-generate       -screen review -deck "Spanish — Food"
 
 # The unreadable-store screen.
 #
