@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  ios:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      # Named explicitly rather than "latest". A toolchain that changes under
+      # you is the thing CI exists to rule out.
+      - name: Select Xcode
+        run: sudo xcode-select -switch /Applications/Xcode_26.4.app
+
+      - name: Show what this runner has
+        run: |
+          xcodebuild -version
+          xcrun simctl list devices available | grep iPhone || true
+
+      # Every job below runs a script that is also what a person runs locally.
+      # CI having its own build commands is how "works on my machine" survives
+      # having CI.
+      - name: Tests
+        run: ./scripts/test-ios.sh "$SIMULATOR"
+        env:
+          SIMULATOR: iPhone 17 Pro
+
+      - name: Figures still match the code
+        run: ./scripts/check-figures.sh "$SIMULATOR"
+        env:
+          SIMULATOR: iPhone 17 Pro
+
+      - name: No secrets in the tree
+        run: |
+          ! grep -rIE "sk-[A-Za-z0-9]{16,}" --exclude-dir=.git . \
+            | grep -v "sk-your-key-here"
+
+      # Asks git what is tracked, not what is on disk. Both of these files
+      # exist after a build - that is fine and expected. The failure being
+      # tested for is that somebody committed one. The first draft of this step
+      # checked the filesystem and would have failed on its own first run.
+      - name: Nothing generated was committed
+        run: |
+          if git ls-files | grep -E '(^|/)Info\.plist$|\.xcodeproj/'; then
+            echo "A generated file is tracked. See Chapter 7."
+            exit 1
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screenshots
+          path: screenshots/

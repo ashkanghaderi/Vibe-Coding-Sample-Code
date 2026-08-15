@@ -21,7 +21,8 @@ d=json.load(sys.stdin)['devices']
 for rt in sorted(d, reverse=True):
     for dev in d[rt]:
         if dev['name'] == want: print(dev['udid']); raise SystemExit
-raise SystemExit('no simulator named ' + want)
+available = sorted({dev['name'] for rt in d for dev in d[rt] if 'iPhone' in dev['name']})
+raise SystemExit(f'no simulator named {want}\\navailable iPhones: ' + ', '.join(available))
 ")
 echo "==> device: $WANTED ($UDID)"
 
@@ -74,6 +75,14 @@ xcrun simctl install "$UDID" .build/Build/Products/Debug-iphonesimulator/Flashca
 # Chapter 8.
 xcrun simctl spawn "$UDID" defaults write com.apple.Preferences \
     DidShowContinuousPathIntroduction -bool true
+
+# Pin the status bar. Without this every screenshot contains the current time,
+# so two runs of this script produce different bytes and no CI job can ever ask
+# "do the figures still match the code?". With it, re-running produces
+# byte-identical PNGs. See Chapter 11.
+xcrun simctl status_bar "$UDID" override \
+    --time "9:41" --batteryState charged --batteryLevel 100 \
+    --wifiBars 3 --cellularBars 4
 
 mkdir -p "$SHOTS"
 

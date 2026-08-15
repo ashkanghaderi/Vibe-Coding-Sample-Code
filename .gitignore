@@ -5,3 +5,4 @@ DerivedData/
 .env
 .claude/settings.local.json
 ios/Info.plist
+.venv-figures/

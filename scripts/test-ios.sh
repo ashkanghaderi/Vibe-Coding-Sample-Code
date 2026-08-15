@@ -15,7 +15,8 @@ d=json.load(sys.stdin)['devices']
 for rt in sorted(d, reverse=True):
     for dev in d[rt]:
         if dev['name'] == want: print(dev['udid']); raise SystemExit
-raise SystemExit('no simulator named ' + want)
+available = sorted({dev['name'] for rt in d for dev in d[rt] if 'iPhone' in dev['name']})
+raise SystemExit(f'no simulator named {want}\\navailable iPhones: ' + ', '.join(available))
 ")
 echo "==> device: $WANTED ($UDID)"
 
