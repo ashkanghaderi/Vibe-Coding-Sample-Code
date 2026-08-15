@@ -34,18 +34,27 @@ enum ScreenshotState {
 struct Deck: Identifiable, Hashable {
     let id = UUID()
     var name: String
-    var dueCount: Int
     var totalCount: Int
+
+    /// How many cards are waiting.
+    ///
+    /// Derived, not stored. It used to be a number typed into the sample data
+    /// beside a completely separate list of cards, and the two disagreed for
+    /// two chapters - the badge said 12, the review screen served 3. Keeping
+    /// them in sync was never going to work; there is now only one of them.
+    var dueCount: Int { dueCards.count }
 }
 
 struct DeckList: View {
     var openTo: ScreenshotState? = nil
 
     @State private var path: [Deck] = []
-    @State private var decks: [Deck] = [
-        Deck(name: "Spanish — Verbs", dueCount: 12, totalCount: 240),
-        Deck(name: "Spanish — Food", dueCount: 0, totalCount: 86),
-        Deck(name: "Kanji N5", dueCount: 34, totalCount: 103),
+    @State private var decks: [Deck] = DeckList.sampleDecks
+
+    static let sampleDecks: [Deck] = [
+        Deck(name: "Spanish — Verbs", totalCount: 240),
+        Deck(name: "Spanish — Food", totalCount: 86),
+        Deck(name: "Kanji N5", totalCount: 103),
     ]
 
     var body: some View {
