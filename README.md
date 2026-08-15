@@ -7,10 +7,9 @@ Every chapter of the book corresponds to a real commit here, made during a real
 Claude Code session — including the wrong turns.
 
 ```bash
-git log --oneline          # the book, as commits
-git tag                    # the checkpoints chapters refer to
-git checkout ch06-before   # what the model saw
-git checkout ch06-after    # what fixed it
+git log --oneline               # the book, as commits
+git tag                         # the checkpoints chapters refer to
+git checkout ch06-badge-mismatch   # the chapter's state, exactly
 ```
 
 **This repository is being written alongside the book.** Tags appear as their
