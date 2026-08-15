@@ -53,13 +53,29 @@ echo "==> launching"
 xcrun simctl boot "$UDID" 2>/dev/null || true
 xcrun simctl bootstatus "$UDID" -b >/dev/null
 xcrun simctl install "$UDID" .build/Build/Products/Debug-iphonesimulator/Flashcards.app
-xcrun simctl launch "$UDID" "$BUNDLE" >/dev/null
-sleep 4
 
+mkdir -p "$SHOTS"
+
+# Each screenshot is a fresh launch with launch arguments naming the screen and
+# its state. The app reads them (see ScreenshotState) and opens there directly.
+#
+# Nobody taps anything. That is the whole point: a screenshot produced by hand
+# cannot be reproduced, and a figure nobody can reproduce is a figure nobody can
+# check against the code beside it.
+#
 # simctl resolves a relative path against its own working directory, not yours.
 # `screenshots/x.png` becomes `/screenshots/x.png` and fails with "The folder
-# 'x.png' doesn't exist" — a message that names the wrong thing entirely.
+# 'x.png' doesn't exist" - a message that names the wrong thing entirely.
 # Absolute paths only. See Chapter 2.
-mkdir -p "$SHOTS"
-xcrun simctl io "$UDID" screenshot "$SHOTS/ios-deck-list.png" >/dev/null
-echo "==> wrote screenshots/ios-deck-list.png"
+shoot() {
+    local name="$1"; shift
+    xcrun simctl terminate "$UDID" "$BUNDLE" 2>/dev/null || true
+    xcrun simctl launch "$UDID" "$BUNDLE" "$@" >/dev/null
+    sleep 3
+    xcrun simctl io "$UDID" screenshot "$SHOTS/$name.png" >/dev/null 2>&1
+    echo "==> wrote screenshots/$name.png"
+}
+
+shoot ios-deck-list
+shoot ios-review-front   -screen review -revealed NO
+shoot ios-review-back    -screen review -revealed YES
