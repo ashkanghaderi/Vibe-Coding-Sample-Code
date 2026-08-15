@@ -10,8 +10,29 @@ import Observation
 final class DeckStore {
     private(set) var decks: [Deck]
 
+    /// Set when loading failed. The app shows it; it does not swallow it.
+    private(set) var loadError: String?
+
+    private let storage: DeckStorage?
+
     init(decks: [Deck] = DeckStore.sample) {
         self.decks = decks
+        self.storage = nil
+    }
+
+    /// Loads from storage, keeping the failure if there is one.
+    ///
+    /// On an unreadable file this deliberately does *not* fall back to the
+    /// sample decks. Starting fresh looks like recovery and is data loss with a
+    /// friendly face - the next save would overwrite what could not be read.
+    init(storage: DeckStorage) {
+        self.storage = storage
+        do {
+            self.decks = try storage.load()
+        } catch {
+            self.decks = []
+            self.loadError = String(describing: error)
+        }
     }
 
     static let sample: [Deck] = [
@@ -19,6 +40,11 @@ final class DeckStore {
         Deck(name: "Spanish — Food", totalCount: 86),
         Deck(name: "Kanji N5", totalCount: 103),
     ]
+
+    private func persist() {
+        guard let storage, loadError == nil else { return }
+        try? storage.save(decks)
+    }
 
     /// Whether a proposed name can be added.
     ///
@@ -40,6 +66,7 @@ final class DeckStore {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard canAdd(trimmed) else { return false }
         decks.append(Deck(name: trimmed, totalCount: 0))
+        persist()
         return true
     }
 }

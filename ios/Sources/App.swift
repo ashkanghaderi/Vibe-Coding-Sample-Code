@@ -38,8 +38,8 @@ enum ScreenshotState {
     }
 }
 
-struct Deck: Identifiable, Hashable {
-    let id = UUID()
+struct Deck: Identifiable, Hashable, Codable {
+    var id = UUID()
     var name: String
     var totalCount: Int
 
@@ -56,7 +56,8 @@ struct DeckList: View {
     var openTo: ScreenshotState? = nil
 
     @State private var path: [Deck] = []
-    @State private var store = DeckStore()
+    @State private var store = DeckStore(storage: FileDeckStorage(
+        directory: URL.documentsDirectory))
     @State private var isAddingDeck = false
 
     var body: some View {
@@ -93,6 +94,18 @@ struct DeckList: View {
             }
             .sheet(isPresented: $isAddingDeck) {
                 AddDeckView(store: store) { isAddingDeck = false }
+            }
+            .overlay(alignment: .bottom) {
+                if let loadError = store.loadError {
+                    // Loud on purpose. The alternative - an empty deck list -
+                    // looks like a working app that has forgotten everything.
+                    Text("Your decks could not be loaded. The file has been "
+                         + "kept.\n\(loadError)")
+                        .font(.footnote)
+                        .padding(12)
+                        .background(.orange.opacity(0.25), in: .rect(cornerRadius: 10))
+                        .padding()
+                }
             }
         }
         .onAppear(perform: applyScreenshotState)
