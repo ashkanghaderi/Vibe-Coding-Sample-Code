@@ -1,0 +1,21 @@
+# The Xcode project is generated from this file by XcodeGen.
+#
+# That is a deliberate choice for a book about AI-assisted development: an
+# .xcodeproj is an opaque binary-ish blob that neither you nor a language model
+# can read, review, or diff sensibly. This file is fourteen lines of YAML that
+# both can.
+name: Flashcards
+options:
+  bundleIdPrefix: com.ashkanghaderi
+  deploymentTarget:
+    iOS: "18.0"
+targets:
+  Flashcards:
+    type: application
+    platform: iOS
+    sources: [Sources]
+    info:
+      path: Info.plist
+      properties:
+        UILaunchScreen: {}
+        CFBundleDisplayName: Flashcards
