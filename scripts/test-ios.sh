@@ -40,5 +40,16 @@ fi
 # "Executed 0 tests, with 0 failures" - it is counting a framework we do not
 # use. It prints exactly the same line when there are no tests at all, so a
 # script that quotes it as evidence is quoting nothing. See Chapter 5.
-grep -E "Test run with .* (passed|failed)" "$LOG" | tail -1 || true
+SUMMARY=$(grep -E "Test run with .* (passed|failed)" "$LOG" | tail -1 || true)
+
+# No summary means no tests ran. xcodebuild is perfectly happy about that - a
+# test target with nothing in it exits 0 and says nothing at all, which is the
+# one outcome that must never read as success. See Chapter 5.
+if [ -z "$SUMMARY" ]; then
+    echo "==> NO TESTS RAN. The target built and executed nothing."
+    echo "==> full log: $LOG"
+    exit 1
+fi
+
+echo "$SUMMARY"
 echo "==> tests passed"
