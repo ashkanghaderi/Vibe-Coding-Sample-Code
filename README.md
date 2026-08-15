@@ -8,9 +8,14 @@ Claude Code session — including the wrong turns.
 
 ```bash
 git log --oneline          # the book, as commits
+git tag                    # the checkpoints chapters refer to
 git checkout ch06-before   # what the model saw
 git checkout ch06-after    # what fixed it
 ```
+
+**This repository is being written alongside the book.** Tags appear as their
+chapters are finished, so `git tag` is the authoritative list of what exists
+today.
 
 ## The app
 

@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./scripts/shoot-ios.sh:*)",
+      "Bash(xcodegen generate)",
+      "Bash(xcrun simctl list:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./**/*.p12)",
+      "Read(./**/*.mobileprovision)",
+      "Bash(git push:*)",
+      "Bash(git commit:*)",
+      "Bash(xcrun altool:*)",
+      "Bash(xcrun notarytool:*)"
+    ]
+  }
+}
