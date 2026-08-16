@@ -16,6 +16,7 @@
       "Bash(git push:*)",
       "Bash(git commit:*)",
       "Bash(xcrun altool:*)",
+      "Bash(xcodebuild:* -allowProvisioningUpdates*)",
       "Bash(xcrun notarytool:*)"
     ]
   }

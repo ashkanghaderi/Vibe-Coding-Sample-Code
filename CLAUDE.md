@@ -40,6 +40,12 @@ code beside it.
 prints the path to the full log. Most failures here have been in the toolchain
 or the environment, not in the Swift.
 
+**Never upload a build.** `scripts/release-ios.sh` archives and exports and
+then stops, printing the `altool` command. Uploading is visible to other people
+and is a decision a person makes. The same goes for anything that touches an
+Apple Developer account: `-allowProvisioningUpdates` creates App IDs and
+certificates on a real team.
+
 **No API keys in this repository, ever.** The AI card generator reads
 `FLASHCARDS_API_KEY` from the environment. There is a `.env.example`; there is
 no `.env`.
