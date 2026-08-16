@@ -80,6 +80,12 @@ xcrun simctl spawn "$UDID" defaults write com.apple.Preferences \
 # so two runs of this script produce different bytes and no CI job can ever ask
 # "do the figures still match the code?". With it, re-running produces
 # byte-identical PNGs. See Chapter 11.
+# Set the text size explicitly rather than inheriting whatever the simulator
+# was last left at. The accessibility figures below change it, and an
+# interrupted run - or a person poking at Settings - otherwise leaves every
+# other figure shot at the wrong size. check-figures.sh caught exactly that.
+xcrun simctl ui "$UDID" content_size large
+
 xcrun simctl status_bar "$UDID" override \
     --time "9:41" --batteryState charged --batteryLevel 100 \
     --wifiBars 3 --cellularBars 4
