@@ -49,7 +49,13 @@ struct FileDeckStorage: DeckStorage {
             at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
         // Atomic: a crash mid-write leaves the old file, not half of the new
         // one. Without this the failure is silent and only shows up next launch.
-        try data.write(to: url, options: .atomic)
+        //
+        // completeFileProtection: the file is unreadable while the device is
+        // locked. The default is "complete until first user authentication",
+        // which means that after one unlock since boot the data is readable by
+        // anything running - including a process attached to a stolen, locked
+        // phone. This is user data; it costs one array element. See Chapter 22.
+        try data.write(to: url, options: [.atomic, .completeFileProtection])
     }
 
     /// Move an unparseable file aside so the next save cannot destroy it.

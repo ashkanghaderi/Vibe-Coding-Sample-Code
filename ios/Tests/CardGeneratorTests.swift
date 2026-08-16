@@ -137,3 +137,39 @@ struct CardGeneratorTests {
         #expect(APIKey(value) == nil)
     }
 }
+
+@Suite("CardGenerator limits", .serialized)
+struct CardGeneratorLimitTests {
+
+    private func generator() throws -> RemoteCardGenerator {
+        RemoteCardGenerator(
+            key: try #require(APIKey("sk-test-SECRETVALUE")),
+            endpoint: URL(string: "https://example.invalid/v1/chat")!,
+            session: StubProtocol.session)
+    }
+
+    @Test("A reply with absurdly many cards is refused")
+    func refusesTooManyCards() async throws {
+        let cards = (0..<5_000).map { #"{"front":"a\#($0)","back":"b"}"# }
+        StubProtocol.reset(body: #"{"cards":["# + cards.joined(separator: ",") + "]}")
+        await #expect(throws: GeneratorError.self) {
+            try await generator().generate(count: 10, forDeckNamed: "Spanish")
+        }
+    }
+
+    @Test("A reply with an enormous field is refused")
+    func refusesHugeFields() async throws {
+        let huge = String(repeating: "x", count: 10_000)
+        StubProtocol.reset(body: #"{"cards":[{"front":"\#(huge)","back":"b"}]}"#)
+        await #expect(throws: GeneratorError.self) {
+            try await generator().generate(count: 1, forDeckNamed: "Spanish")
+        }
+    }
+
+    @Test("A reply within the limits still works")
+    func acceptsReasonableReplies() async throws {
+        StubProtocol.reset(body: #"{"cards":[{"front":"to run","back":"correr"}]}"#)
+        let cards = try await generator().generate(count: 1, forDeckNamed: "Spanish")
+        #expect(cards.count == 1)
+    }
+}
