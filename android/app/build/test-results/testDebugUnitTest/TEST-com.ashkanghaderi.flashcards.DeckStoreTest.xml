@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ashkanghaderi.flashcards.DeckStoreTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-08-16T09:58:25.560Z" hostname="ashkans-MacBook-Pro.local" time="0.007">
+  <properties/>
+  <testcase name="search matches names and card text" classname="com.ashkanghaderi.flashcards.DeckStoreTest" time="0.006"/>
+  <testcase name="blank and duplicate names are refused" classname="com.ashkanghaderi.flashcards.DeckStoreTest" time="0.0"/>
+  <testcase name="whitespace is trimmed, not preserved" classname="com.ashkanghaderi.flashcards.DeckStoreTest" time="0.001"/>
+  <testcase name="a deck's badge matches the cards it will serve" classname="com.ashkanghaderi.flashcards.DeckStoreTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

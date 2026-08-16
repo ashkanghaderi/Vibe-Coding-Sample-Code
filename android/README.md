@@ -1,31 +1,30 @@
-# Android — work in progress
+# Android
 
-This directory does not build yet in the environment it was written in, and the
-reason is worth recording rather than hiding.
+The same app, from the same specification, in Kotlin.
 
-`https://dl.google.com/dl/android/maven2` returns HTTP 404 for every artifact
-requested from it here, including ones that are certainly published — for
-example `androidx.activity:activity-compose:1.9.3`, which is present in the
-local Gradle cache and therefore definitely exists. Maven Central responds
-normally (`junit:junit:4.13.2` resolves), so this is specific to Google's Maven
-repository, not to networking in general.
+    ./scripts/shoot-android.sh          # build, boot an emulator, capture
+    cd android && ./gradlew testDebugUnitTest
 
-The local Gradle cache is partial: some artifacts are complete, and some
-directories exist with no files in them, which is why `--offline` also fails
-with "No cached version of androidx.annotation:annotation-jvm:1.8.1 available".
+## Why there is no Compose here
 
-What is verified:
+Compose is not used, and the reason is a constraint rather than a preference.
 
-- JDK 21 (Android Studio's bundled JBR) and Gradle 8.14.5 both work
-- `gradle wrapper` succeeds, and the generated wrapper runs
-- AGP 8.13.2, Kotlin 2.0.21 and the Compose compiler plugin all resolve
-- The build reaches `:app:checkDebugAarMetadata`, so the project itself is
-  well-formed — it fails on dependency download, not on configuration
+On the machine this was written on, `https://dl.google.com/dl/android/maven2`
+returns HTTP 404 for every artifact requested from it — including ones that are
+certainly published, and including the group index. Maven Central answers
+normally. The local Gradle cache holds Compose *metadata* (`.pom`, `.module`)
+but none of the `.aar` files, so `--offline` cannot help either.
 
-To finish it, run one build with access to Google's Maven:
+So this app is built from the Android framework's own views, with no androidx
+dependency at all. `android.useAndroidX=false`, and the only external
+dependency is JUnit, from Maven Central.
 
-    JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" \
-    ANDROID_HOME="$HOME/Library/Android/sdk" \
-    ./gradlew assembleDebug
+That turned out to be more interesting than the original plan. Chapter 19
+compares SwiftUI against framework views rather than against Compose, which
+makes the asymmetries larger and easier to see — safe areas, list construction,
+and the forty lines of hand-written JSON that `Codable` gives the iOS side for
+free.
 
-Once the cache is populated, `--offline` will work from here.
+If you have access to Google's Maven, adding Compose back is a plugin, a BOM
+and a dependency block. The logic layer would not change at all, which is
+itself the point of Part III.
