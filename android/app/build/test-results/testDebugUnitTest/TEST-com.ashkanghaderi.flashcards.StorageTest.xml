@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ashkanghaderi.flashcards.StorageTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-08-16T09:58:25.569Z" hostname="ashkans-MacBook-Pro.local" time="0.02">
+  <properties/>
+  <testcase name="an unreadable file is an error, not an empty list" classname="com.ashkanghaderi.flashcards.StorageTest" time="0.007"/>
+  <testcase name="a store that failed to load refuses to save over it" classname="com.ashkanghaderi.flashcards.StorageTest" time="0.002"/>
+  <testcase name="an unreadable file is kept, not overwritten" classname="com.ashkanghaderi.flashcards.StorageTest" time="0.002"/>
+  <testcase name="a first run gets the sample decks" classname="com.ashkanghaderi.flashcards.StorageTest" time="0.001"/>
+  <testcase name="decks survive a round trip" classname="com.ashkanghaderi.flashcards.StorageTest" time="0.008"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
