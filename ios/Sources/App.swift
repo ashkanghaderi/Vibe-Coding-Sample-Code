@@ -64,10 +64,12 @@ struct DeckList: View {
     @State private var store = DeckStore(storage: FileDeckStorage(
         directory: URL.documentsDirectory))
     @State private var isAddingDeck = false
+    @State private var query = ""
+    @State private var visibleDecks: [Deck] = []
 
     var body: some View {
         NavigationStack(path: $path) {
-            List(store.decks) { deck in
+            List(visibleDecks) { deck in
                 NavigationLink(value: deck) {
                 HStack(spacing: 14) {
                     RoundedRectangle(cornerRadius: 8)
@@ -96,6 +98,20 @@ struct DeckList: View {
             .navigationDestination(for: Deck.self) {
                 ReviewView(deck: $0, startRevealed: startRevealed)
             }
+            .searchable(text: $query, prompt: "Search decks and cards")
+            // Debounced, not because typing is slow but because searching is.
+            // On a corpus of 40,000 cards the same seven keystrokes cost 296 ms
+            // searched individually and 42 ms searched once - a bigger win than
+            // any index measured for this, and no new data structure. See
+            // Chapter 13.
+            .task(id: query) {
+                if !query.isEmpty {
+                    try? await Task.sleep(for: .milliseconds(200))
+                    guard !Task.isCancelled else { return }
+                }
+                visibleDecks = DeckSearch.results(
+                    for: query, in: store.decks, cards: { $0.dueCards })
+            }
             .navigationTitle("Decks")
             .toolbar {
                 Button("Add", systemImage: "plus") { isAddingDeck = true }
@@ -117,6 +133,7 @@ struct DeckList: View {
             }
         }
         .onAppear(perform: applyScreenshotState)
+        .onChange(of: store.decks) { visibleDecks = store.decks }
     }
 
     private var startRevealed: Bool {
