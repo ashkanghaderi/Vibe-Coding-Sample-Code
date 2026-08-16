@@ -6,3 +6,7 @@ DerivedData/
 .claude/settings.local.json
 ios/Info.plist
 .venv-figures/
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties

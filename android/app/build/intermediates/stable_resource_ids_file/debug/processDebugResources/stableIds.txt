@@ -1,1 +1,0 @@
-com.ashkanghaderi.flashcards:style/Theme.Flashcards = 0x7f010000
