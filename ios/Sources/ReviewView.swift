@@ -10,6 +10,11 @@ struct ReviewView: View {
     @State private var generatorMessage: String?
     @State private var isGenerating = false
 
+    /// Dynamic Type is a layout input, not a font setting. At accessibility
+    /// sizes the two answer buttons cannot sit side by side - the words split
+    /// mid-syllable inside circles - so the row becomes a column.
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     private var cards: [Card] { deck.dueCards }
     private var card: Card? { cards.indices.contains(index) ? cards[index] : nil }
 
@@ -24,8 +29,14 @@ struct ReviewView: View {
 
                 VStack(spacing: 18) {
                     Text(card.front)
-                        .font(.system(size: 34, weight: .semibold))
+                        // .font(.system(size: 34)) is a fixed size and ignores
+                        // Dynamic Type entirely. At accessibility sizes the
+                        // back of the card grew and the front did not, so the
+                        // most important text on the screen became the
+                        // smallest. A text style scales; a number does not.
+                        .font(.largeTitle.weight(.semibold))
                         .multilineTextAlignment(.center)
+                        .accessibilityAddTraits(.isHeader)
 
                     if isRevealed {
                         Divider().frame(width: 120)
@@ -40,16 +51,16 @@ struct ReviewView: View {
                 .padding(.horizontal, 24)
                 .background(.background.secondary, in: .rect(cornerRadius: 18))
                 .padding(.horizontal, 20)
+                .contentShape(.rect)
                 .onTapGesture { withAnimation(.snappy) { isRevealed = true } }
+                .accessibilityElement(children: .combine)
+                .accessibilityHint(isRevealed ? "" : "Double tap to reveal the answer")
 
                 Spacer()
 
                 if isRevealed {
-                    HStack(spacing: 12) {
-                        answerButton("Again", tint: .orange)
-                        answerButton("Good", tint: .blue)
-                    }
-                    .padding(.horizontal, 20)
+                    answerButtons
+                        .padding(.horizontal, 20)
                 } else {
                     Text("Tap the card to reveal")
                         .font(.footnote)
@@ -78,6 +89,21 @@ struct ReviewView: View {
         .navigationTitle(deck.name)
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { isRevealed = startRevealed }
+    }
+
+    @ViewBuilder
+    private var answerButtons: some View {
+        if dynamicTypeSize.isAccessibilitySize {
+            VStack(spacing: 12) {
+                answerButton("Again", tint: .orange)
+                answerButton("Good", tint: .blue)
+            }
+        } else {
+            HStack(spacing: 12) {
+                answerButton("Again", tint: .orange)
+                answerButton("Good", tint: .blue)
+            }
+        }
     }
 
     private func answerButton(_ title: String, tint: Color) -> some View {

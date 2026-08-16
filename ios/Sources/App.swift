@@ -55,6 +55,11 @@ struct Deck: Identifiable, Hashable, Codable {
 struct DeckList: View {
     var openTo: ScreenshotState? = nil
 
+    /// Scales with the text size. A hardcoded `height: 38` stayed 38 points
+    /// while the row around it tripled, which turned a deliberate accent into
+    /// a speck.
+    @ScaledMetric(relativeTo: .body) private var accentHeight: CGFloat = 38
+
     @State private var path: [Deck] = []
     @State private var store = DeckStore(storage: FileDeckStorage(
         directory: URL.documentsDirectory))
@@ -67,7 +72,7 @@ struct DeckList: View {
                 HStack(spacing: 14) {
                     RoundedRectangle(cornerRadius: 8)
                         .fill(deck.dueCount > 0 ? .blue : .secondary.opacity(0.3))
-                        .frame(width: 4, height: 38)
+                        .frame(width: 4, height: accentHeight)
                     VStack(alignment: .leading, spacing: 3) {
                         Text(deck.name).font(.body.weight(.medium))
                         Text("\(deck.totalCount) cards")
@@ -75,7 +80,10 @@ struct DeckList: View {
                     }
                     Spacer()
                     if deck.dueCount > 0 {
+                        // Without a label VoiceOver reads "3". With it, the
+                        // badge says what it counts.
                         Text("\(deck.dueCount)")
+                            .accessibilityLabel("\(deck.dueCount) cards due")
                             .font(.footnote.weight(.semibold).monospacedDigit())
                             .padding(.horizontal, 9).padding(.vertical, 4)
                             .background(.blue, in: .capsule)

@@ -112,6 +112,16 @@ shoot ios-review-back    -screen review -revealed YES
 shoot ios-add-deck       -screen addDeck
 shoot ios-generate       -screen review -deck "Spanish — Food"
 
+# The same screens at the largest accessibility text size.
+#
+# Dynamic Type is where generated layout code breaks first, and it breaks
+# invisibly: nothing fails, the screen is simply unusable for people who need
+# large text. Photographing it is the only check there is. See Chapter 12.
+xcrun simctl ui "$UDID" content_size accessibility-extra-extra-extra-large
+shoot ios-a11y-review    -screen review -revealed YES
+shoot ios-a11y-deck-list
+xcrun simctl ui "$UDID" content_size large
+
 # The unreadable-store screen.
 #
 # Corrupting the file from the script rather than adding a "pretend the store is
